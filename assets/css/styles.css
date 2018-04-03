@@ -14,3 +14,54 @@
 /*----------------------------------------------------------------
 1. GLOBAL 
 -------------------------------------------------------------------*/
+
+body{
+    background: #0f1f39 url("../img/bg1.jpg") no-repeat;
+   background-size: cover;
+}
+audio {
+    width: 100%;
+}
+
+/*----------------------------------------------------------------
+1. SITE COLORS
+-------------------------------------------------------------------*/
+.blueBg {
+    background: #214769b3; 
+}
+.blueClr{
+    color: #82c4ff !important;
+}
+
+.blkBrdr{
+    border: 2px solid black;
+}
+
+/*----------------------------------------------------------------
+1. TYPOGRAPHY
+-------------------------------------------------------------------*/
+.title-triv {
+    font-size: 4rem;
+}
+p {
+    font-size: 1.4rem;
+}
+
+/*----------------------------------------------------------------
+1. MOBILE
+-------------------------------------------------------------------*/
+
+/* Medium devices (tablets, less than 700px) */
+@media (max-width: 700px) {
+    body{
+        background: #0f1f39 url("../img/bg2.png") no-repeat;
+        background-size: cover;
+
+    }
+    .title-triv {
+        font-size: 2rem;
+    }
+    p {
+        font-size: .8rem;
+    }
+}
