@@ -16,7 +16,7 @@
 -------------------------------------------------------------------*/
 
 body{
-    background: #0f1f39 url("../img/bg1.jpg") no-repeat;
+    background: #0f1f39 url("../img/bg1.jpg") no-repeat center;
    background-size: cover;
 }
 audio {
@@ -54,7 +54,7 @@ p {
 /* Medium devices (tablets, less than 700px) */
 @media (max-width: 700px) {
     body{
-        background: #0f1f39 url("../img/bg2.png") no-repeat;
+        background: #0f1f39 url("../img/bg2.png") no-repeat top center;
         background-size: cover;
 
     }
