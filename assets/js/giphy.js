@@ -1,131 +1,137 @@
 /*::::::DOM CACHE::::::*/
-var clickSound = new Audio("assets/audio/button-click.mp3");
-var audio = document.getElementById('bgAudio');
-var gameCont = $("#gameCont");
+const clickSound = new Audio("assets/audio/button-click.mp3");
+const audio = document.getElementById('bgAudio');
+const gameCont = $("#gameCont");
 
-// ::::::::::: GLOBAL VARIABLES :::::::::
-var topics = ["dancing", "hugging", "walking", "laughing", "bitching", "caging", "today", "funny", "outdoors"];
-var apiKey = "dLKvEKP8ZF6G5KkiIJCHB7vwJOAJbnvr"
+/*::::::DATA::::::*/
+const topics = ["dancing", "hugging", "walking", "laughing", "bitching", "caging", "today", "funny", "outdoors"];
+const apiKey = "dLKvEKP8ZF6G5KkiIJCHB7vwJOAJbnvr";
 
-// on page load start the application 
-$(document).ready(function () {
-    jsSetup();
-    audio.currentTime = 19.4;
-    audio.play();
-});
+/*::::::EVENT LISTENERS::::::*/
+// Click sound will execute when elements in the body wih .click are clicked on.
+$("body").on("click", ".click", clickSnd);
 
-// click sound will execute when elements in the body are click on
-$("body").on("click", function (event) {
-    clickSound.play();
-});
+/*::::::MAIN JS::::::*/
+// On page load start the application.
+$(document).ready(jsSetup);
 
-// this is the form logic
-function prcesfrm() {
-    // var for the input field 
-    var giphInput = $("#giphName");
-    // when add gif button is pressed
-    $('#giph').submit(function (e) {
-        // prevents the page from reloading
-        e.preventDefault();
-        // resets results 
-        $("#results").remove();
-        // only execute the add gif if form is empty
-        if (giphInput.val().trim() !== "") {
-            // reset buttons
-            $("#buttons").remove();
-            // input value 
-            var newGiph = giphInput.val().trim();
-            // add input value to array
-            topics.push(newGiph);
-            // reset input area 
-            $('#giph').trigger("reset");
-            // call  generate buttons function 
-            genBtns();
-            // call getGiph function
-            getGiph();
-        } else {
-            alert('silly rabbit! you need info in your form to create a button ');
 
+// This function is the logic behind the search form.
+function prcesfrm(e) {
+   // When form is submitted prevent default, prevents the page from reloading. 
+   e.preventDefault();
+   // Remove results container and get it ready for the next search. 
+   const results =  $("#results");
+   results.remove();
+   // Grab the value of the search input. 
+    let giphInput = $("#giphName").val().trim();
+    // Case in which nothing was entered into the form. 
+    if (giphInput += "") {
+        results.html(genElement("<p>", null, "py-1", "Sorry! for some reason that keyword returned no result. Try again."));
+    }
+    // Update the buttons with the search val. 
+    topics.push(giphInput);
+    genBtns();
+    getGiph(giphInput);
+}
+
+// This function is all about gaining access to the API, retrieving the gif's and displaying them in #results.
+function getGiph(val) {
+   $("#results").remove();
+    const giph = $(this).attr("data-giph");
+    // Query URL for both cases. 
+    const queryURL = `https://api.giphy.com/v1/gifs/search?q=${giph || val}&api_key=${apiKey}&limit=10`;
+    const gifCont = genElement("<div>", "results", "col-12 blkBrdr my-3 py-3", null);
+    gameCont.append(gifCont);
+
+    $.ajax({
+        url: queryURL,
+        method: "GET"
+    }).then(res => {
+        const results = res.data;
+        const gifDiv = genElement("<div>", "item", null, null);
+        for (let i = 0; i < results.length; i++) {
+            const image = genElement("<img>", null, "gif img-fluid", null).click(gifInit);
+            const p = genElement("<p>", null, null, `Rating: ${results[i].rating}`);
+            image.attr({
+                src: results[i].images.fixed_height_still.url,
+                "data-animate": results[i].images.fixed_height.url,
+                "data-still": results[i].images.fixed_height_still.url,
+                "data-state": "still"
+            });
+            gifDiv.append(image, p);
+            $("#results").prepend(gifDiv);
         }
     });
-
+    const small = genElement("<small>", "small", "pt-2 d-block", "Click on the gif to see it animate.");
+    $("#small").remove();
+    $("#buttons").append(small);
 }
 
-function getGiph() {
-// this function is all about gaining access to the API, retrieving the gifs and displaying them in #results
-    $(".start").on("click", function () {
-        $("#results").remove();
-        var rsltCont = $(" <div id='results'>");
-        rsltCont.addClass("col-12 blkBrdr my-3 py-3");
-        $("#gameCont").append(rsltCont);
-        var giph = $(this).attr("data-giph");
-        
-        var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
-            giph + "&api_key=" + apiKey + "&limit=10";
-
-        $.ajax({
-            url: queryURL,
-            method: "GET"
-        }).then(function (response) {
-            var results = response.data;
-            for (var i = 0; i < results.length; i++) {
-                var gifDiv = $("<div class='item'>");
-                var rating = results[i].rating;
-                var p = $("<p>").text("Rating: " + rating);
-                var image = $("<img>");
-                image.addClass("gif img-fluid");
-                image.attr("src", results[i].images.fixed_height_still.url);
-                image.attr("data-animate", results[i].images.fixed_height.url);
-                image.attr("data-still", results[i].images.fixed_height_still.url);
-                image.attr("data-state", "still");
-                gifDiv.append(p);
-                gifDiv.prepend(image);
-                $("#results").prepend(gifDiv);
-            }
-            $(".gif").on("click", function () {
-                var state = $(this).attr("data-state");
-                // if gif is on the still state execute block of code if not preform the else block of code
-                if (state === "still") {
-                    $(this).attr("src", $(this).attr("data-animate"));
-                    $(this).attr("data-state", "animate");
-                } else {
-                    $(this).attr("src", $(this).attr("data-still"));
-                    $(this).attr("data-state", "still");
-                }
-            });
-        });
-    });
-}
-
-function genBtns() {
-    $("#buttons").empty();
-    var btnDiv = $("<div id='buttons'>");
-    for (var i = 0; i < topics.length; i++) {
-        var element = topics[i];
-        var btnG = $("<button>");
-        btnG.addClass("btn start btn-outline-light mr-2 mb-2");
-        btnG.attr("data-giph", element);
-        btnG.text(element);
-        $(btnDiv).append(btnG);
+// Function to change the attribute to cause gif to animate. 
+function gifInit() {
+    const state = $(this).attr("data-state");
+    // if gif is on the still state execute block of code if not preform the else block of code.
+    if (state === "still") {
+        $(this).attr("src", $(this).attr("data-animate"));
+        $(this).attr("data-state", "animate");
+    } else {
+        $(this).attr("src", $(this).attr("data-still"));
+        $(this).attr("data-state", "still");
     }
-    $(gameCont).append(btnDiv);
 }
 
+// Function to generate the buttons. 
+function genBtns() {
+    $("#buttons").remove();
+    const btnDiv = genElement("<div>", "buttons", null, null);
+    for (let btn of topics) {
+        btnDiv.append(genElement("<button>", null, "btn click start btn-outline-light mr-2 mb-2", btn).attr("data-giph", btn).click(getGiph));
+    }
+    gameCont.append(btnDiv);
+}
+
+// Generate the Gif search form.
 function giphContent() {
-    var gameHTML = "<h1 class='text-center text-white'>GET YOUR GIPHY ON!! </h1>" +
-        "<p id='text-area' class='py-1'>Click on any buttons to start Giph'N! If you want to add more buttons use the form below. </p>" +
-        "<nav class='navbar navbar-light d-flex justify-content-center mb-2'>" +
-        "<form id='giph' class='form-inline d-flex justify-content-sm-right justify-content-center'>" +
-        "<input id='giphName' class='form-control mr-sm-2' type='text' placeholder='Create Giph' aria-label='Create Giph'>" +
-        "<button id='getGiph' class='btn btn-outline-light my-2 my-sm-0' type='submit'>Create Giphy</button>" +
-        "</form>" +
-        "</nav><hr>";
-    $(gameCont).html(gameHTML);
+    const h1 = genElement("<h1>", null, "text-center text-white", "GET YOUR GIPHY ON!!");
+    const p = genElement("<p>", "text-area", "py-1", "Click on any buttons to start Giph'N! If you want to add more buttons use the form below.");
+    const sFrom = genElement("<form>", "giph", "form-inline d-flex justify-content-sm-right justify-content-center", null);
+    const divIg = genElement("<div>", null, "input-group", null);
+    const sInput = genElement("<input>", "giphName", "form-control mr-sm-2", null);
+    sInput.attr({
+        type: "text",
+        placeholder: "Search A Giph...",
+        "aria-label": "Create Giph"
+    });
+    const btnSpan = genElement("<span>", null, "input-group-btn", null);
+    const sBtn = genElement("<button>", "getGiph", "click btn btn-outline-light my-2 my-sm-0 ml-1", "Create Giph").attr("type", "submit");
+    const hr = "<hr>";
+    btnSpan.append(sBtn);
+    divIg.append(sInput, btnSpan)
+    sFrom.append(divIg)
+    gameCont.append(h1, p, sFrom, hr);
+    $("form").on("submit", prcesfrm);
+
 }
 
+/*::::::MAIN STARTER FUNCTION::::::*/
 function jsSetup() {
+    audio.currentTime = 19.4;
+    audio.play();
     giphContent();
     genBtns();
-    getGiph();
-    prcesfrm();
+}
+
+/*::::::HELPER FUNCTIONS::::::*/
+function clickSnd() {
+    clickSound.play();
+}
+
+// All HTML elements are generated from this function. 
+function genElement(type, id, className, text) {
+    const newEl = $(type).addClass(className).text(text);
+    if (id !== null) {
+        newEl.attr("id", id);
+    }
+    return newEl;
 }
